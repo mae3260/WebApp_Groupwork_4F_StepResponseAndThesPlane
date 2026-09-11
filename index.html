@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GroupWork 4F &mdash; Step Response and the s-Plane</title>
+
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.17.0/katex.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.17.0/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --ink: #0F1115;
+    --panel: #171A21;
+    --panel2: #1D212B;
+    --line: #282D3A;
+    --amber: #FFB454;
+    --cyan: #5EEAD4;
+    --rose: #FB7185;
+    --pink: #F472B6;
+    --fg: #E7E9EE;
+    --muted: #8B92A5;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--ink); color: var(--fg);
+    font-family: 'Inter', sans-serif;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+  header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 20px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--amber); }
+  header h1 {
+    font-size: 14px; margin: 0; font-weight: 600;
+    font-family: 'JetBrains Mono', monospace; letter-spacing: 0.02em;
+  }
+  header h1 span { color: var(--muted); font-weight: 400; }
+
+  main { flex: 1; display: flex; overflow: hidden; }
+
+  nav {
+    width: 220px; flex-shrink: 0;
+    background: var(--panel);
+    border-left: 1px solid var(--line);
+    order: 2;
+    padding: 16px 14px;
+    overflow-y: auto;
+  }
+  nav p.label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted);
+    letter-spacing: 0.1em; margin: 14px 0 8px 0;
+  }
+  nav p.label:first-child { margin-top: 0; }
+  .nav-btn {
+    display: block; width: 100%; text-align: left;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    padding: 9px 12px; margin-bottom: 6px;
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 6px;
+    color: var(--fg); cursor: pointer;
+  }
+  .nav-btn.active { border-color: var(--amber); color: var(--amber); }
+  .nav-btn small { display: block; font-family: 'Inter', sans-serif; font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  .content { flex: 1; order: 1; overflow-y: auto; padding: 28px 40px; }
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  h2.section-title {
+    font-family: 'JetBrains Mono', monospace; font-size: 20px; color: var(--amber);
+    margin: 0 0 14px 0;
+  }
+  h3.problem-title {
+    font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--cyan);
+    margin: 0 0 10px 0;
+  }
+  h4.part-title {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--fg);
+    margin: 22px 0 8px 0;
+  }
+  p.instructions {
+    font-size: 14.5px; line-height: 1.65; color: var(--fg); margin: 0 0 16px 0;
+  }
+  ul.goals { padding-left: 20px; margin: 0 0 16px 0; }
+  ul.goals li { margin-bottom: 6px; font-size: 13.5px; line-height: 1.55; color: var(--fg); }
+
+  .eq-block {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    text-align: center;
+    font-size: 16px;
+  }
+  .given-line {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
+    margin: 0 0 18px 0; line-height: 1.8;
+  }
+  .given-line b { color: var(--fg); font-weight: 600; }
+
+  .note-box {
+    background: var(--panel2); border-left: 3px solid var(--amber); border-radius: 4px;
+    padding: 12px 16px; margin: 0 0 18px 0; font-size: 13px; line-height: 1.6; color: var(--fg);
+  }
+
+  .panel-box {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 18px 20px; margin-bottom: 18px;
+  }
+
+  .numfield-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .numfield-row:last-child { margin-bottom: 0; }
+  .numfield-row label { font-size: 13px; color: var(--muted); width: 40px; font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
+  .numfield-row input[type="number"] {
+    width: 160px; background: var(--ink); border: 1px solid var(--line); border-radius: 5px;
+    color: var(--fg); font-family: 'JetBrains Mono', monospace; font-size: 14px; padding: 8px 10px;
+  }
+  .numfield-row input[type="number"]:focus { outline: none; border-color: var(--amber); }
+
+  .upload-block {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px;
+    margin: 0 0 18px 0;
+  }
+  .upload-block input[type="file"] {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; color: var(--fg);
+  }
+  .upload-thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .thumb-wrap { position: relative; width: 90px; height: 120px; }
+  .thumb-img {
+    width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid var(--line);
+    display: block;
+  }
+  .thumb-remove {
+    position: absolute; top: -7px; right: -7px; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--rose); color: var(--ink); border: none; cursor: pointer; font-size: 13px;
+    line-height: 1; display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .upload-status { font-size: 11px; color: var(--cyan); margin: 8px 0 0 0; font-family: 'JetBrains Mono', monospace; }
+  .upload-err { font-size: 11px; color: var(--rose); margin: 8px 0 0 0; font-family: 'JetBrains Mono', monospace; line-height: 1.5; }
+
+  .file-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+    padding: 6px 10px; margin: 4px 6px 4px 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  }
+  .file-chip .chip-remove {
+    background: none; border: none; color: var(--rose); cursor: pointer; font-size: 13px; line-height: 1;
+    font-family: 'JetBrains Mono', monospace; padding: 0;
+  }
+
+  .reflection-box {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px;
+  }
+  .reflection-box textarea {
+    width: 100%; min-height: 90px; resize: vertical;
+    background: var(--ink); border: 1px solid var(--line); border-radius: 5px;
+    color: var(--fg); font-family: 'Inter', sans-serif; font-size: 14px;
+    padding: 10px 12px; line-height: 1.5;
+  }
+  .reflection-box textarea:focus { outline: none; border-color: var(--amber); }
+
+  .run-btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+    padding: 10px 22px; border-radius: 6px; border: none;
+    background: var(--amber); color: var(--ink); cursor: pointer;
+  }
+  .run-btn:hover { filter: brightness(1.08); }
+  .run-btn:active { transform: scale(0.98); }
+  .run-btn.secondary { background: none; color: var(--muted); border: 1px solid var(--line); }
+  .run-btn.secondary:hover { color: var(--rose); border-color: var(--rose); }
+
+  .match-banner {
+    display: none;
+    margin-top: 16px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    padding: 10px 14px; border-radius: 6px; border: 1px solid var(--line);
+  }
+  .match-banner.match { display: block; border-color: var(--cyan); color: var(--cyan); }
+  .match-banner.no-match { display: block; border-color: var(--rose); color: var(--rose); }
+
+  .field-err { font-size: 11px; color: var(--rose); margin: 8px 0 0 0; min-height: 14px; font-family: 'JetBrains Mono', monospace; }
+
+  .plots-row { display: flex; gap: 16px; margin-top: 18px; }
+  .plots-row .plot-col { flex: 1; min-width: 0; }
+  .plot-label { font-size: 11px; color: var(--muted); margin: 0 0 6px 2px; font-family: 'JetBrains Mono', monospace; }
+  .plot-host { height: 340px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+  .placeholder {
+    display: flex; align-items: center; justify-content: center; height: 100%;
+    color: var(--muted); font-size: 13px; text-align: center; max-width: 320px; margin: 0 auto; padding: 0 20px;
+  }
+
+  .steps-list { padding-left: 20px; margin: 0 0 16px 0; }
+  .steps-list li { margin-bottom: 6px; font-size: 13.5px; line-height: 1.55; color: var(--fg); }
+
+  .katex { color: var(--fg); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dot"></div>
+  <h1>GROUPWORK 4F <span>&mdash; Step Response and the s-Plane (M&amp;AE 3260)</span></h1>
+</header>
+
+<main>
+  <nav>
+    <p class="label">BACKGROUND</p>
+    <button class="nav-btn active" data-part="intro">Intro<small>Learning goals &amp; theory</small></button>
+
+    <p class="label">PROBLEM 1</p>
+    <button class="nav-btn" data-part="p1">Changing &omega;n<small>Add to plot</small></button>
+
+    <p class="label">PROBLEM 2</p>
+    <button class="nav-btn" data-part="p2">Changing &zeta;<small>Add to plot</small></button>
+
+    <p class="label">PROBLEM 3</p>
+    <button class="nav-btn" data-part="p3">Stability &amp; the s-Plane<small>Add to plot</small></button>
+
+    <p class="label">PROBLEM 4</p>
+    <button class="nav-btn" data-part="p4">Pole &rarr; Response<small>Given pole pair</small></button>
+
+    <p class="label">SUBMIT</p>
+    <button class="nav-btn" data-part="submission">Submission<small>Export your PDF</small></button>
+  </nav>
+
+  <div class="content">
+    <div class="wrap">
+
+      <!-- ============== INTRO ============== -->
+      <section id="part-intro">
+        <h2 class="section-title">Step Response and the s-Plane</h2>
+
+        <p class="instructions"><b>Learning Goals:</b></p>
+        <ul class="goals">
+          <li>Identify poles of a 2nd order system from the system's transfer function</li>
+          <li>Translate back and forth between a system's poles and their locations in the s-plane</li>
+          <li>Relate pole locations in the s-plane to step response in the time domain</li>
+        </ul>
+
+        <p class="instructions">
+          A mass-spring-damper system m&#7817;+b&#7819;+kx=f(t) has transfer function
+        </p>
+        <div class="eq-block" id="eq-tf"></div>
+        <p class="instructions">
+          with poles p<sub>1,2</sub> = &minus;&zeta;&omega;n &plusmn; j&omega;n&radic;(1&minus;&zeta;&sup2;)
+          for 0&lt;&zeta;&lt;1 (complex conjugate pair &mdash; underdamped), both real for
+          &zeta;&ge;1 (critically damped / overdamped), and unstable (positive real part)
+          for &zeta;&lt;0. For a step force f(t)=F<sub>0</sub>&middot;1(t), the response is
+        </p>
+        <div class="eq-block" id="eq-step"></div>
+        <p class="instructions">
+          Every problem below plots the step response x(t) and the pole locations
+          side by side, so you can see directly how moving the poles changes the
+          response &mdash; the same idea as the provided
+          <code class="mono">SecondOrderResponse_sPlane.mlx</code> script.
+        </p>
+        <p class="given-line">GIVEN (all problems) &middot; m = <b>1 kg</b> &middot; F<sub>0</sub> = <b>1 N</b></p>
+      </section>
+
+      <!-- ============== PROBLEM 1 ============== -->
+      <section id="part-p1" style="display:none;">
+        <h3 class="problem-title">Problem 1: Changing Natural Frequency</h3>
+        <p class="instructions">
+          Consider a 2nd-order mass-spring-damper system with a given mass m. Explore
+          the effect of changing the system's natural frequency &omega;n. Plot the step
+          response and the pole locations with at least 4 different &omega;n &mdash;
+          keep &zeta; fixed while you do this. Keep your range of &omega;n within a
+          similar order of magnitude so the plots stay readable.
+        </p>
+
+        <div class="panel-box">
+          <div class="numfield-row"><label>&zeta;</label><input type="number" id="input-p1-zeta" value="0.3" step="any" /></div>
+          <div class="numfield-row"><label>&omega;n</label><input type="number" id="input-p1-wn" value="5" step="any" /></div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button class="run-btn" id="btn-add-p1">ADD TO PLOT</button>
+          <button class="run-btn secondary" id="btn-clear-p1">CLEAR</button>
+        </div>
+        <p class="field-err" id="err-p1"></p>
+
+        <div class="plots-row">
+          <div class="plot-col">
+            <p class="plot-label">step response x(t)</p>
+            <div class="plot-host" id="plot-p1-x"><div class="placeholder">Set &zeta;, &omega;n and click Add to Plot.</div></div>
+          </div>
+          <div class="plot-col">
+            <p class="plot-label">pole map (s-plane)</p>
+            <div class="plot-host" id="plot-p1-pole"></div>
+          </div>
+        </div>
+
+        <h4 class="part-title">b) Discussion</h4>
+        <p class="instructions">Discuss what you observe about the pole locations and step response (decay rate, settling time, oscillation amplitude, speed, and steady state, etc.).</p>
+        <div class="reflection-box">
+          <textarea id="input-p1-reflection-b" placeholder="Type your answer here..."></textarea>
+        </div>
+
+        <h4 class="part-title">c) Discussion</h4>
+        <p class="instructions">Explain physically why changing the natural frequency (while keeping the mass and damping ratio held constant) would or would not change the steady-state value.</p>
+        <div class="reflection-box">
+          <textarea id="input-p1-reflection-c" placeholder="Type your answer here..."></textarea>
+        </div>
+      </section>
+
+      <!-- ============== PROBLEM 2 ============== -->
+      <section id="part-p2" style="display:none;">
+        <h3 class="problem-title">Problem 2: Changing Damping Ratio</h3>
+        <p class="instructions">
+          Similar to Problem 1, now explore the effect of changing a system's damping
+          ratio &zeta;. Plot the step response and pole locations with at least 4
+          different stable damping ratios &zeta; &mdash; keep &omega;n fixed while you
+          do this.
+        </p>
+
+        <div class="panel-box">
+          <div class="numfield-row"><label>&zeta;</label><input type="number" id="input-p2-zeta" value="0.3" step="any" /></div>
+          <div class="numfield-row"><label>&omega;n</label><input type="number" id="input-p2-wn" value="5" step="any" /></div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button class="run-btn" id="btn-add-p2">ADD TO PLOT</button>
+          <button class="run-btn secondary" id="btn-clear-p2">CLEAR</button>
+        </div>
+        <p class="field-err" id="err-p2"></p>
+
+        <div class="plots-row">
+          <div class="plot-col">
+            <p class="plot-label">step response x(t)</p>
+            <div class="plot-host" id="plot-p2-x"><div class="placeholder">Set &zeta;, &omega;n and click Add to Plot.</div></div>
+          </div>
+          <div class="plot-col">
+            <p class="plot-label">pole map (s-plane)</p>
+            <div class="plot-host" id="plot-p2-pole"></div>
+          </div>
+        </div>
+
+        <h4 class="part-title">b) Discussion</h4>
+        <p class="instructions">Discuss what you observe about the pole locations and step response (decay rate and settling time, oscillation amplitude and speed, steady state, etc.).</p>
+        <div class="reflection-box">
+          <textarea id="input-p2-reflection-b" placeholder="Type your answer here..."></textarea>
+        </div>
+
+        <h4 class="part-title">c) Discussion</h4>
+        <p class="instructions">Explain physically why changing the damping ratio (while keeping the mass and natural frequency held constant) would or would not change the steady-state value.</p>
+        <div class="reflection-box">
+          <textarea id="input-p2-reflection-c" placeholder="Type your answer here..."></textarea>
+        </div>
+      </section>
+
+      <!-- ============== PROBLEM 3 ============== -->
+      <section id="part-p3" style="display:none;">
+        <h3 class="problem-title">Problem 3: Stability and the s-Plane</h3>
+        <p class="instructions">
+          Explore the boundaries of stability by varying &zeta; while natural
+          frequency is held constant. Plot the step response and pole locations with
+          at least 4 different &zeta; &mdash; your set must include an
+          <b>unstable</b>, an <b>underdamped</b>, a <b>critically damped</b>, and an
+          <b>overdamped</b> case (try &zeta; &lt; 0 for unstable).
+        </p>
+
+        <div class="panel-box">
+          <div class="numfield-row"><label>&zeta;</label><input type="number" id="input-p3-zeta" value="0.3" step="any" /></div>
+          <div class="numfield-row"><label>&omega;n</label><input type="number" id="input-p3-wn" value="5" step="any" /></div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button class="run-btn" id="btn-add-p3">ADD TO PLOT</button>
+          <button class="run-btn secondary" id="btn-clear-p3">CLEAR</button>
+        </div>
+        <p class="field-err" id="err-p3"></p>
+
+        <div class="plots-row">
+          <div class="plot-col">
+            <p class="plot-label">step response x(t)</p>
+            <div class="plot-host" id="plot-p3-x"><div class="placeholder">Set &zeta;, &omega;n and click Add to Plot.</div></div>
+          </div>
+          <div class="plot-col">
+            <p class="plot-label">pole map (s-plane)</p>
+            <div class="plot-host" id="plot-p3-pole"></div>
+          </div>
+        </div>
+
+        <h4 class="part-title">b) Discussion</h4>
+        <p class="instructions">Discuss what you observe about the pole locations and step response.</p>
+        <div class="reflection-box">
+          <textarea id="input-p3-reflection-b" placeholder="Type your answer here..."></textarea>
+        </div>
+      </section>
+
+      <!-- ============== PROBLEM 4 ============== -->
+      <section id="part-p4" style="display:none;">
+        <h3 class="problem-title">Problem 4: Inferring Step Response from Pole Placement</h3>
+        <p class="instructions">
+          A 2nd-order system has the pole pair shown below (both poles are complex
+          conjugates of each other).
+        </p>
+        <div class="eq-block" id="eq-p4-pole"></div>
+
+        <h4 class="part-title">a) Calculate &zeta; and &omega;n</h4>
+        <p class="instructions">Use the geometric relationship between the pole location and &zeta;, &omega;n (see the intro) to calculate them, then enter your values below to check.</p>
+        <div class="panel-box">
+          <div class="numfield-row"><label>&zeta;</label><input type="number" id="input-p4-zeta" value="" step="any" /></div>
+          <div class="numfield-row"><label>&omega;n</label><input type="number" id="input-p4-wn" value="" step="any" /></div>
+        </div>
+        <button class="run-btn" id="btn-check-p4">CHECK</button>
+        <div class="match-banner" id="banner-p4"></div>
+
+        <h4 class="part-title">b) Discussion &amp; sketch</h4>
+        <p class="instructions">Given these pole locations (and &zeta;, &omega;n), discuss and sketch with your group what you think the step response may look like. Try to reason it out before moving on to part (c).</p>
+        <div class="reflection-box">
+          <textarea id="input-p4-reflection" placeholder="Type your answer here..."></textarea>
+        </div>
+        <p class="instructions" style="margin-top:16px;">Upload a photo of your group's sketch (optional):</p>
+        <div class="upload-block">
+          <input type="file" id="upload-input-p4" accept="image/*" multiple />
+          <div class="upload-thumbs" id="upload-thumbs-p4"></div>
+          <p class="upload-status" id="upload-status-p4"></p>
+          <p class="upload-err" id="upload-err-p4"></p>
+        </div>
+
+        <h4 class="part-title">c) Confirm with a plot</h4>
+        <p class="instructions">Now plot the step response and pole locations (using your &zeta;, &omega;n from part a) to see how your prediction compares.</p>
+        <button class="run-btn" id="btn-plot-p4">PLOT</button>
+
+        <div class="plots-row">
+          <div class="plot-col">
+            <p class="plot-label">step response x(t)</p>
+            <div class="plot-host" id="plot-p4-x"><div class="placeholder">Click Plot to see the result.</div></div>
+          </div>
+          <div class="plot-col">
+            <p class="plot-label">pole map (s-plane)</p>
+            <div class="plot-host" id="plot-p4-pole"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== SUBMISSION ============== -->
+      <section id="part-submission" style="display:none;">
+        <h2 class="section-title">Submission</h2>
+
+        <div class="numfield-row" style="width:100%;">
+          <label style="width:70px;">NetID</label>
+          <input type="text" id="input-netid" placeholder="netid" spellcheck="false" style="width:100%;" />
+        </div>
+        <div class="numfield-row" style="width:100%;">
+          <label style="width:70px;">Group</label>
+          <input type="text" id="input-group-netids" placeholder="person1, person2, person3, ..." spellcheck="false" style="width:100%;" />
+        </div>
+
+        <ul class="steps-list" style="margin-top: 22px;">
+          <li>Enter your NetID and group member NetIDs above and export PDF.</li>
+          <li>Submit: Plots (1a, 2a, 3a, 4b/c) and a summary of discussions/explanations (other parts).</li>
+          <li>Optionally, attach an existing PDF below and it will be appended to the end of the exported file.</li>
+          <li>Submit the combined PDF to the Gradescope submission link by Monday 11:59PM.</li>
+        </ul>
+
+        <p class="instructions">Append an existing PDF to the end of your export (optional):</p>
+        <div class="upload-block">
+          <input type="file" id="upload-input-appendix" accept="application/pdf" multiple />
+          <div id="upload-thumbs-appendix" style="display:flex; flex-wrap:wrap; margin-top:10px;"></div>
+          <p class="upload-status" id="upload-status-appendix" style="display:none;"></p>
+          <p class="upload-err" id="upload-err-appendix"></p>
+        </div>
+
+        <button class="run-btn" id="exportPdfBtn" style="margin-top: 10px;">EXPORT PDF</button>
+        <p class="field-err" id="exportStatus" style="color:var(--muted);"></p>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  const PLOT_OPTS = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ["lasso2d", "select2d"] };
+  const D_PALETTE = ["#FFB454", "#5EEAD4", "#FB7185", "#A78BFA", "#F472B6", "#34D399", "#60A5FA", "#FDE047"];
+  const GIVEN = { m: 1, F0: 1 };
+
+  function plotLayoutAuto(yTitle) {
+    return {
+      paper_bgcolor: "#171A21",
+      plot_bgcolor: "#171A21",
+      font: { color: "#E7E9EE", family: "JetBrains Mono, monospace", size: 10 },
+      margin: { l: 50, r: 15, t: 15, b: 40 },
+      xaxis: { title: "time t [s]", gridcolor: "#282D3A", zerolinecolor: "#282D3A" },
+      yaxis: { title: yTitle, gridcolor: "#282D3A", zerolinecolor: "#282D3A" },
+      legend: { orientation: "h", y: -0.25, font: { size: 9 } },
+      showlegend: true,
+    };
+  }
+  function poleLayout(xRange, yRange) {
+    return {
+      paper_bgcolor: "#171A21",
+      plot_bgcolor: "#171A21",
+      font: { color: "#E7E9EE", family: "JetBrains Mono, monospace", size: 10 },
+      margin: { l: 50, r: 15, t: 15, b: 40 },
+      xaxis: { title: "Re(s)", gridcolor: "#282D3A", zerolinecolor: "#8B92A5", range: xRange, autorange: false },
+      yaxis: { title: "Im(s)", gridcolor: "#282D3A", zerolinecolor: "#8B92A5", range: yRange, autorange: false },
+      legend: { orientation: "h", y: -0.25, font: { size: 9 } },
+      showlegend: true,
+    };
+  }
+  const AXIS_POLE_STD = { x: [-15, 15], y: [-15, 15] };
+  const AXIS_POLE_P4 = { x: [-50, 50], y: [-50, 50] };
+
+  // ---------------------------------------------------------------
+  // KaTeX
+  // ---------------------------------------------------------------
+  katex.render(
+    "G(s)=\\frac{X(s)}{F(s)}=\\frac{1/m}{s^2+2\\zeta\\omega_n s+\\omega_n^2}=\\frac{1/m}{(s-p_1)(s-p_2)}",
+    document.getElementById("eq-tf"), { throwOnError: false, displayMode: true }
+  );
+  katex.render(
+    "x(t)=\\frac{F_0}{m\\omega_n^2}\\left[1-e^{-\\zeta\\omega_n t}\\left(\\cos\\omega_d t+\\frac{\\zeta}{\\sqrt{1-\\zeta^2}}\\sin\\omega_d t\\right)\\right],\\quad \\omega_d=\\omega_n\\sqrt{1-\\zeta^2}",
+    document.getElementById("eq-step"), { throwOnError: false, displayMode: true }
+  );
+  katex.render(
+    "p_{1,2}=-24\\pm 32j",
+    document.getElementById("eq-p4-pole"), { throwOnError: false, displayMode: true }
+  );
+
+  // ---------------------------------------------------------------
+  // Navigation
+  // ---------------------------------------------------------------
+  const SECTION_IDS = {
+    "intro": "part-intro", "p1": "part-p1", "p2": "part-p2", "p3": "part-p3", "p4": "part-p4",
+    "submission": "part-submission",
+  };
+  document.querySelectorAll(".nav-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".nav-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      Object.values(SECTION_IDS).forEach((id) => { document.getElementById(id).style.display = "none"; });
+      document.getElementById(SECTION_IDS[btn.dataset.part]).style.display = "block";
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // Core physics. For x'' + 2*zeta*wn*x' + wn^2*x = F0/m * 1(t),
+  // x(0)=0, x'(0)=0 (standard "step response" convention):
+  //
+  //   poles: p_real = -zeta*wn; if |zeta|<1, complex pair
+  //     p_real +/- j*wn*sqrt(1-zeta^2); else two real poles
+  //     p_real +/- wn*sqrt(zeta^2-1)
+  //
+  //   x(t) = xss + [free response about xss with x0=-xss, v0=0],
+  //     xss = F0/(m*wn^2)
+  //
+  // Verified against numerical ODE integration (scipy) across all
+  // regimes AND against the assignment PDF's own Eq.(7) to machine
+  // precision before shipping.
+  // ---------------------------------------------------------------
+  function computePoles(zeta, wn) {
+    const sReal = -zeta * wn;
+    const disc = zeta * zeta - 1;
+    if (disc < 0) {
+      const wd = wn * Math.sqrt(1 - zeta * zeta);
+      return { complex: true, p1: { re: sReal, im: wd }, p2: { re: sReal, im: -wd } };
+    } else {
+      const sq = wn * Math.sqrt(disc);
+      return { complex: false, p1: { re: sReal + sq, im: 0 }, p2: { re: sReal - sq, im: 0 } };
+    }
+  }
+
+  function naturalDuration(zeta, wn) {
+    const sReal = -zeta * wn;
+    const disc = zeta * zeta - 1;
+    const sqrtTerm = Math.sqrt(Math.max(0, disc)) * wn;
+    const dominant = sReal + sqrtTerm;
+    let duration;
+    if (Math.abs(dominant) < 1e-6) {
+      const wd = wn * Math.sqrt(Math.max(0, 1 - zeta * zeta));
+      duration = wd > 1e-9 ? (3 * 2 * Math.PI / wd) : (10 / wn);
+    } else if (dominant < 0) {
+      duration = Math.log(100) / Math.abs(dominant);
+    } else {
+      duration = Math.log(50) / dominant;
+    }
+    return Math.max(duration, 0.05);
+  }
+
+  function stepResponseOverDuration(zeta, wn, m, F0, duration, N) {
+    const npts = N || 400;
+    const t = Array.from({ length: npts }, (_, i) => (i / (npts - 1)) * duration);
+    const xss = F0 / (m * wn * wn);
+    const sReal = -zeta * wn;
+    const disc = zeta * zeta - 1;
+    const x0adj = -xss;
+    let x;
+    if (Math.abs(disc) < 1e-9) {
+      const s = sReal;
+      const A = x0adj, B = 0 - s * x0adj;
+      x = t.map((tt) => xss + (A + B * tt) * Math.exp(s * tt));
+    } else if (disc < 0) {
+      const wd = wn * Math.sqrt(1 - zeta * zeta);
+      x = t.map((tt) => xss + Math.exp(sReal * tt) * (x0adj * Math.cos(wd * tt) + ((0 - sReal * x0adj) / wd) * Math.sin(wd * tt)));
+    } else {
+      const sq = wn * Math.sqrt(disc);
+      const s1 = sReal + sq, s2 = sReal - sq;
+      const C1 = (0 - s2 * x0adj) / (s1 - s2);
+      const C2 = x0adj - C1;
+      x = t.map((tt) => xss + C1 * Math.exp(s1 * tt) + C2 * Math.exp(s2 * tt));
+    }
+    return { t, x };
+  }
+
+  const runFlags = {};
+
+  // ---------------------------------------------------------------
+  // "Add to Plot" widget shared by Problems 1, 2, 3: each click adds
+  // one (zeta, wn) pair, contributing a trace to BOTH the step
+  // response plot and the pole map (same color, so a student can
+  // visually match a curve to its poles). Raw parameters are stored
+  // (not baked x/y), and every redraw recomputes ALL curves over a
+  // shared duration -- the longest any of them individually need --
+  // so a fast-decaying curve doesn't visibly stop early relative to
+  // a slower one on the same axes.
+  // ---------------------------------------------------------------
+  const msdTraces = {};
+
+  function makeAddToPlot(prefix) {
+    msdTraces[prefix] = [];
+
+    function addToPlot() {
+      const errEl = document.getElementById(`err-${prefix}`);
+      errEl.textContent = "";
+      const zeta = Number(document.getElementById(`input-${prefix}-zeta`).value);
+      const wn = Number(document.getElementById(`input-${prefix}-wn`).value);
+      if (!isFinite(zeta) || !(wn > 0)) {
+        errEl.textContent = "\u03b6 must be a number and \u03c9n must be positive.";
+        return;
+      }
+      const color = D_PALETTE[msdTraces[prefix].length % D_PALETTE.length];
+      const label = `\u03b6=${zeta}, \u03c9n=${wn}`;
+      msdTraces[prefix].push({ zeta, wn, label, color });
+      redraw(prefix);
+      runFlags[prefix] = true;
+    }
+    function clear() {
+      msdTraces[prefix] = [];
+      redraw(prefix);
+    }
+    document.getElementById(`btn-add-${prefix}`).addEventListener("click", addToPlot);
+    document.getElementById(`btn-clear-${prefix}`).addEventListener("click", clear);
+  }
+
+  function redraw(prefix) {
+    const entries = msdTraces[prefix];
+    const xHost = `plot-${prefix}-x`;
+    const poleHost = `plot-${prefix}-pole`;
+    if (!entries || entries.length === 0) {
+      document.getElementById(xHost).innerHTML = '<div class="placeholder">Set \u03b6, \u03c9n and click Add to Plot.</div>';
+      document.getElementById(poleHost).innerHTML = "";
+      return;
+    }
+    const sharedDuration = Math.max(...entries.map((e) => naturalDuration(e.zeta, e.wn)));
+    const xTraces = [];
+    const poleTraces = [];
+    entries.forEach((e) => {
+      const { t, x } = stepResponseOverDuration(e.zeta, e.wn, GIVEN.m, GIVEN.F0, sharedDuration);
+      xTraces.push({ x: t, y: x, mode: "lines", name: e.label, line: { color: e.color, width: 2.2 } });
+      const poles = computePoles(e.zeta, e.wn);
+      poleTraces.push({
+        x: [poles.p1.re, poles.p2.re], y: [poles.p1.im, poles.p2.im],
+        mode: "markers", name: e.label,
+        marker: { color: e.color, symbol: "x", size: 11, line: { width: 2 } },
+      });
+    });
+    Plotly.newPlot(xHost, xTraces, plotLayoutAuto("x(t) [m]"), PLOT_OPTS);
+    Plotly.newPlot(poleHost, poleTraces, poleLayout(AXIS_POLE_STD.x, AXIS_POLE_STD.y), PLOT_OPTS);
+  }
+
+  makeAddToPlot("p1");
+  makeAddToPlot("p2");
+  makeAddToPlot("p3");
+
+  // ---------------------------------------------------------------
+  // Problem 4: given pole pair -24 +/- 32j -> zeta=0.6, wn=40.
+  // Part a) checks the student's zeta/wn; part c) plots using the
+  // SAME fields (kept separate so the plot doesn't appear until they
+  // deliberately click Plot, preserving the "predict before you look"
+  // order the assignment asks for).
+  // ---------------------------------------------------------------
+  const P4_TRUE = { zeta: 0.6, wn: 40 };
+
+  document.getElementById("btn-check-p4").addEventListener("click", () => {
+    const banner = document.getElementById("banner-p4");
+    banner.className = "match-banner";
+    banner.textContent = "";
+    const zeta = Number(document.getElementById("input-p4-zeta").value);
+    const wn = Number(document.getElementById("input-p4-wn").value);
+    if (!isFinite(zeta) || !isFinite(wn)) {
+      banner.className = "match-banner no-match";
+      banner.textContent = "Enter numbers for both \u03b6 and \u03c9n.";
+      return;
+    }
+    const zetaOk = Math.abs(zeta - P4_TRUE.zeta) < 0.01;
+    const wnOk = Math.abs(wn - P4_TRUE.wn) / P4_TRUE.wn < 0.01;
+    if (zetaOk && wnOk) {
+      banner.className = "match-banner match";
+      banner.textContent = "\u2713 Correct.";
+    } else {
+      const zetaErr = Math.abs(zeta - P4_TRUE.zeta);
+      const wnErrPct = Math.abs(wn - P4_TRUE.wn) / P4_TRUE.wn * 100;
+      banner.className = "match-banner no-match";
+      banner.textContent = `\u2717 Not quite (\u03b6 off by ${zetaErr.toFixed(3)}, \u03c9n off by ${wnErrPct.toFixed(1)}%) \u2014 recheck the geometry (Re(p) = -\u03b6\u03c9n, Im(p) = \u03c9n\u221a(1-\u03b6\u00b2)).`;
+    }
+  });
+
+  document.getElementById("btn-plot-p4").addEventListener("click", () => {
+    const zeta = Number(document.getElementById("input-p4-zeta").value);
+    const wn = Number(document.getElementById("input-p4-wn").value);
+    if (!isFinite(zeta) || !(wn > 0)) return;
+    const duration = naturalDuration(zeta, wn);
+    const { t, x } = stepResponseOverDuration(zeta, wn, GIVEN.m, GIVEN.F0, duration);
+    const poles = computePoles(zeta, wn);
+    Plotly.newPlot("plot-p4-x", [
+      { x: t, y: x, mode: "lines", name: `\u03b6=${zeta}, \u03c9n=${wn}`, line: { color: "#FFB454", width: 2.5 } },
+    ], plotLayoutAuto("x(t) [m]"), PLOT_OPTS);
+    Plotly.newPlot("plot-p4-pole", [
+      { x: [poles.p1.re, poles.p2.re], y: [poles.p1.im, poles.p2.im], mode: "markers",
+        name: `\u03b6=${zeta}, \u03c9n=${wn}`, marker: { color: "#FFB454", symbol: "x", size: 12, line: { width: 2.5 } } },
+    ], poleLayout(AXIS_POLE_P4.x, AXIS_POLE_P4.y), PLOT_OPTS);
+    runFlags["p4"] = true;
+  });
+
+  // ---------------------------------------------------------------
+  // Multi-image "upload your work" widget (Problem 4's sketch photo).
+  // ---------------------------------------------------------------
+  const MAX_IMAGE_DIM = 1200;
+  const IMAGE_QUALITY = 0.7;
+  const uploadedImages = { p4: [] };
+
+  function resizeAndCompressImage(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("Could not read file."));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("Could not load image."));
+        img.onload = () => {
+          let width = img.width, height = img.height;
+          if (width > height && width > MAX_IMAGE_DIM) {
+            height = Math.round((height * MAX_IMAGE_DIM) / width);
+            width = MAX_IMAGE_DIM;
+          } else if (height >= width && height > MAX_IMAGE_DIM) {
+            width = Math.round((width * MAX_IMAGE_DIM) / height);
+            height = MAX_IMAGE_DIM;
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve({ dataUrl: canvas.toDataURL("image/jpeg", IMAGE_QUALITY), width, height });
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  function renderThumbnails(key) {
+    const host = document.getElementById(`upload-thumbs-${key}`);
+    host.innerHTML = "";
+    uploadedImages[key].forEach((entry, i) => {
+      const wrap = document.createElement("div");
+      wrap.className = "thumb-wrap";
+      const img = document.createElement("img");
+      img.src = entry.dataUrl;
+      img.className = "thumb-img";
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "thumb-remove";
+      removeBtn.textContent = "\u00d7";
+      removeBtn.title = "Remove";
+      removeBtn.addEventListener("click", () => {
+        uploadedImages[key].splice(i, 1);
+        renderThumbnails(key);
+      });
+      wrap.appendChild(img);
+      wrap.appendChild(removeBtn);
+      host.appendChild(wrap);
+    });
+    const statusEl = document.getElementById(`upload-status-${key}`);
+    if (statusEl) {
+      const n = uploadedImages[key].length;
+      statusEl.textContent = n > 0 ? `\u2713 ${n} image${n > 1 ? "s" : ""} uploaded` : "";
+    }
+  }
+  function wireImageUpload(key) {
+    const input = document.getElementById(`upload-input-${key}`);
+    const errEl = document.getElementById(`upload-err-${key}`);
+    input.addEventListener("change", async () => {
+      const files = Array.from(input.files || []);
+      const failed = [];
+      for (const file of files) {
+        try {
+          const entry = await resizeAndCompressImage(file);
+          uploadedImages[key].push(entry);
+        } catch (err) {
+          console.error("Image upload failed:", err);
+          failed.push(file.name);
+        }
+      }
+      if (failed.length > 0 && errEl) {
+        errEl.textContent = `Could not load: ${failed.join(", ")}. The file may be an unsupported format (e.g. HEIC) or corrupted \u2014 try re-saving as JPEG/PNG, or take a screenshot instead.`;
+      } else if (errEl) {
+        errEl.textContent = "";
+      }
+      renderThumbnails(key);
+      input.value = "";
+      scheduleSave();
+    });
+  }
+  wireImageUpload("p4");
+
+  // ---------------------------------------------------------------
+  // Appendix PDF(s) on the Submission tab.
+  // ---------------------------------------------------------------
+  let appendixFiles = [];
+  function renderFileChips() {
+    const host = document.getElementById("upload-thumbs-appendix");
+    host.innerHTML = "";
+    appendixFiles.forEach((file, i) => {
+      const chip = document.createElement("div");
+      chip.className = "file-chip";
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = file.name;
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "chip-remove";
+      removeBtn.textContent = "\u00d7";
+      removeBtn.title = "Remove";
+      removeBtn.addEventListener("click", () => {
+        appendixFiles.splice(i, 1);
+        renderFileChips();
+      });
+      chip.appendChild(nameSpan);
+      chip.appendChild(removeBtn);
+      host.appendChild(chip);
+    });
+    const statusEl = document.getElementById("upload-status-appendix");
+    if (statusEl) {
+      const n = appendixFiles.length;
+      statusEl.style.display = n > 0 ? "block" : "none";
+      statusEl.textContent = n > 0 ? `\u2713 ${n} file${n > 1 ? "s" : ""} selected` : "";
+    }
+  }
+  const appendixInput = document.getElementById("upload-input-appendix");
+  appendixInput.addEventListener("change", () => {
+    const errEl = document.getElementById("upload-err-appendix");
+    const chosen = Array.from(appendixInput.files || []);
+    const nonPdf = chosen.filter((f) => f.type !== "application/pdf" && !f.name.toLowerCase().endsWith(".pdf"));
+    const pdfs = chosen.filter((f) => !nonPdf.includes(f));
+    appendixFiles = appendixFiles.concat(pdfs);
+    if (errEl) {
+      errEl.textContent = nonPdf.length > 0 ? `Skipped (not a PDF): ${nonPdf.map((f) => f.name).join(", ")}` : "";
+    }
+    renderFileChips();
+    appendixInput.value = "";
+    scheduleSave();
+  });
+
+  // ---------------------------------------------------------------
+  // Submission: bundle everything into a PDF
+  // ---------------------------------------------------------------
+  function setExportStatus(text, isError) {
+    const el = document.getElementById("exportStatus");
+    el.textContent = text;
+    el.style.color = isError ? "#FB7185" : "#8B92A5";
+  }
+  function reflectionText(id) {
+    const v = document.getElementById(id).value.trim();
+    return v || "(No response entered.)";
+  }
+  function fieldLabelFor(id) {
+    if (id === "input-netid") return "Your NetID";
+    if (id === "input-group-netids") return "Group member NetIDs";
+    const m = id.match(/^input-(p\d)-(.+)$/);
+    if (m) {
+      const [, part, field] = m;
+      return `Problem ${part.slice(1)} (${field.replace(/-/g, " ")})`;
+    }
+    return id;
+  }
+  function findBlankItems() {
+    const blanks = [];
+    document.querySelectorAll('input[id^="input-"], textarea[id^="input-"]').forEach((el) => {
+      if (el.value.trim() === "") blanks.push(fieldLabelFor(el.id));
+    });
+    if (uploadedImages.p4.length === 0) blanks.push("Problem 4 (uploaded sketch) -- optional, ok to skip");
+    return blanks;
+  }
+
+  async function exportPdf() {
+    const blanks = findBlankItems();
+    if (blanks.length > 0) {
+      const proceed = confirm(
+        `The following are still blank:\n\n${blanks.map((b) => "\u2022 " + b).join("\n")}\n\nDo you want to export the PDF anyway?`
+      );
+      if (!proceed) return;
+    }
+
+    const btn = document.getElementById("exportPdfBtn");
+    const originalLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "EXPORTING\u2026";
+    setExportStatus("");
+
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: "pt", format: "letter" });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 48;
+      const maxWidth = pageWidth - margin * 2;
+      let y = margin;
+
+      function ensureSpace(h) { if (y + h > pageHeight - margin) { doc.addPage(); y = margin; } }
+      function addHeading(text) {
+        ensureSpace(30);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(15);
+        doc.text(text, margin, y); y += 22;
+      }
+      function addText(text, opts) {
+        const size = (opts && opts.size) || 10.5;
+        const bold = !!(opts && opts.bold);
+        doc.setFont("helvetica", bold ? "bold" : "normal"); doc.setFontSize(size);
+        const lines = doc.splitTextToSize(text, maxWidth);
+        const lineHeight = size * 1.35;
+        lines.forEach((line) => { ensureSpace(lineHeight); doc.text(line, margin, y); y += lineHeight; });
+        y += 4;
+      }
+      async function addPlotImagePair(xDivId, poleDivId, fallbackLabel) {
+        const halfW = (maxWidth - 12) / 2;
+        let xUrl, poleUrl;
+        try { xUrl = await Plotly.toImage(xDivId, { format: "png", width: 700, height: 460 }); }
+        catch (err) { xUrl = null; }
+        try { poleUrl = await Plotly.toImage(poleDivId, { format: "png", width: 700, height: 460 }); }
+        catch (err) { poleUrl = null; }
+        if (!xUrl && !poleUrl) { addText(`(${fallbackLabel}: plot images could not be captured.)`); return; }
+        const h = halfW * (460 / 700);
+        ensureSpace(h + 10);
+        if (xUrl) doc.addImage(xUrl, "PNG", margin, y, halfW, h);
+        if (poleUrl) doc.addImage(poleUrl, "PNG", margin + halfW + 12, y, halfW, h);
+        y += h + 16;
+      }
+      function addUploadedImages(key) {
+        const entries = uploadedImages[key] || [];
+        if (entries.length === 0) return;
+        addText(`Uploaded work (${entries.length} image${entries.length > 1 ? "s" : ""}):`);
+        const maxW = maxWidth / 2;
+        const maxH = (pageHeight - margin * 2) / 2;
+        entries.forEach((entry) => {
+          const aspect = entry.height / entry.width;
+          let w = maxW, h = w * aspect;
+          if (h > maxH) { h = maxH; w = h / aspect; }
+          ensureSpace(h + 10);
+          const xPos = margin + (maxWidth - w) / 2;
+          doc.addImage(entry.dataUrl, "JPEG", xPos, y, w, h);
+          y += h + 16;
+        });
+      }
+      function addTraceList(prefix) {
+        const entries = msdTraces[prefix] || [];
+        if (entries.length === 0) { addText("(No values plotted yet.)"); return; }
+        addText(`Values plotted: ${entries.map((e) => e.label).join("; ")}`);
+      }
+
+      doc.setFont("helvetica", "bold"); doc.setFontSize(16);
+      doc.splitTextToSize("GroupWork 4F \u2014 Step Response and the s-Plane", maxWidth).forEach((line) => { doc.text(line, margin, y); y += 20; });
+      y += 6;
+
+      const netId = document.getElementById("input-netid").value.trim() || "(not entered)";
+      const groupIds = document.getElementById("input-group-netids").value.trim() || "(not entered)";
+      addText(`Your NetID: ${netId}`, { bold: true, size: 11.5 });
+      addText(`Group member NetIDs: ${groupIds}`, { bold: true, size: 11.5 });
+      y += 8;
+
+      addHeading("Problem 1: Changing Natural Frequency");
+      addTraceList("p1");
+      if (runFlags["p1"]) await addPlotImagePair("plot-p1-x", "plot-p1-pole", "Problem 1 plots");
+      addText("b) Discussion:", { bold: true, size: 10.5 });
+      addText(reflectionText("input-p1-reflection-b"));
+      addText("c) Discussion:", { bold: true, size: 10.5 });
+      addText(reflectionText("input-p1-reflection-c"));
+
+      addHeading("Problem 2: Changing Damping Ratio");
+      addTraceList("p2");
+      if (runFlags["p2"]) await addPlotImagePair("plot-p2-x", "plot-p2-pole", "Problem 2 plots");
+      addText("b) Discussion:", { bold: true, size: 10.5 });
+      addText(reflectionText("input-p2-reflection-b"));
+      addText("c) Discussion:", { bold: true, size: 10.5 });
+      addText(reflectionText("input-p2-reflection-c"));
+
+      addHeading("Problem 3: Stability and the s-Plane");
+      addTraceList("p3");
+      if (runFlags["p3"]) await addPlotImagePair("plot-p3-x", "plot-p3-pole", "Problem 3 plots");
+      addText("b) Discussion:", { bold: true, size: 10.5 });
+      addText(reflectionText("input-p3-reflection-b"));
+
+      addHeading("Problem 4: Inferring Step Response from Pole Placement");
+      addText(`Given pole: -24 + 32j. Entered: \u03b6 = ${document.getElementById("input-p4-zeta").value}, \u03c9n = ${document.getElementById("input-p4-wn").value}`);
+      addText("b) Discussion & sketch prediction:", { bold: true, size: 10.5 });
+      addText(reflectionText("input-p4-reflection"));
+      addUploadedImages("p4");
+      if (runFlags["p4"]) await addPlotImagePair("plot-p4-x", "plot-p4-pole", "Problem 4 plots");
+
+      const safeNetId = netId.replace(/[^a-zA-Z0-9_-]+/g, "_");
+
+      if (appendixFiles.length > 0) {
+        const { PDFDocument } = window.PDFLib;
+        const mergedDoc = await PDFDocument.load(doc.output("arraybuffer"));
+        const failedAppendix = [];
+        for (const file of appendixFiles) {
+          try {
+            const fileBytes = await file.arrayBuffer();
+            const appendixDoc = await PDFDocument.load(fileBytes);
+            const copiedPages = await mergedDoc.copyPages(appendixDoc, appendixDoc.getPageIndices());
+            copiedPages.forEach((p) => mergedDoc.addPage(p));
+          } catch (err) {
+            console.error("Could not append PDF:", file.name, err);
+            failedAppendix.push(file.name);
+          }
+        }
+        const mergedBytes = await mergedDoc.save();
+        const blob = new Blob([mergedBytes], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = `GroupWork4F_${safeNetId}.pdf`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setExportStatus(
+          failedAppendix.length > 0
+            ? `PDF downloaded, but could not append: ${failedAppendix.join(", ")} (make sure these are valid PDF files).`
+            : "PDF downloaded (with appendix attached)."
+        );
+      } else {
+        doc.save(`GroupWork4F_${safeNetId}.pdf`);
+        setExportStatus("PDF downloaded.");
+      }
+    } catch (err) {
+      console.error("PDF export failed:", err);
+      setExportStatus(`Could not export PDF: ${err.message}`, true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+    }
+  }
+  document.getElementById("exportPdfBtn").addEventListener("click", exportPdf);
+
+  // ---------------------------------------------------------------
+  // Progress autosave (localStorage)
+  // ---------------------------------------------------------------
+  const STORAGE_KEY = "gw4f_progress_v1";
+
+  function collectFieldValues() {
+    const values = {};
+    document.querySelectorAll('input[id^="input-"], textarea[id^="input-"]').forEach((el) => {
+      values[el.id] = el.value;
+    });
+    return values;
+  }
+  function currentActiveTab() {
+    const active = document.querySelector(".nav-btn.active");
+    return active ? active.dataset.part : "intro";
+  }
+  function saveProgress() {
+    try {
+      const state = {
+        activeTab: currentActiveTab(),
+        fields: collectFieldValues(),
+        msdTraces: msdTraces,
+        uploadedImages: uploadedImages,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (err) {
+      // storage unavailable -- fail silently
+    }
+  }
+  let saveTimer = null;
+  function scheduleSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveProgress, 250);
+  }
+  document.addEventListener("input", scheduleSave);
+  document.addEventListener("click", scheduleSave);
+
+  function loadProgress() {
+    let raw;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch (err) { return; }
+    if (!raw) return;
+    let state;
+    try { state = JSON.parse(raw); } catch (err) { return; }
+
+    if (state.fields) {
+      Object.keys(state.fields).forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = state.fields[id];
+      });
+    }
+    if (state.msdTraces) {
+      Object.keys(state.msdTraces).forEach((prefix) => {
+        if (msdTraces[prefix] !== undefined) {
+          msdTraces[prefix] = state.msdTraces[prefix] || [];
+          if (msdTraces[prefix].length > 0) runFlags[prefix] = true;
+          redraw(prefix);
+        }
+      });
+    }
+    if (state.uploadedImages) {
+      Object.keys(state.uploadedImages).forEach((key) => {
+        if (uploadedImages[key] !== undefined) {
+          uploadedImages[key] = state.uploadedImages[key] || [];
+          renderThumbnails(key);
+        }
+      });
+    }
+    if (state.activeTab) {
+      const btn = document.querySelector(`.nav-btn[data-part="${state.activeTab}"]`);
+      if (btn) btn.click();
+    }
+  }
+  loadProgress();
+})();
+</script>
+</body>
+</html>
