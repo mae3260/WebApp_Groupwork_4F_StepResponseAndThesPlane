@@ -649,7 +649,8 @@
       }
       const color = D_PALETTE[msdTraces[prefix].length % D_PALETTE.length];
       const label = `\u03b6=${zeta}, \u03c9n=${wn}`;
-      msdTraces[prefix].push({ zeta, wn, label, color });
+      const labelAscii = `zeta=${zeta}, wn=${wn}`;
+      msdTraces[prefix].push({ zeta, wn, label, labelAscii, color });
       redraw(prefix);
       runFlags[prefix] = true;
     }
@@ -980,7 +981,7 @@
       function addTraceList(prefix) {
         const entries = msdTraces[prefix] || [];
         if (entries.length === 0) { addText("(No values plotted yet.)"); return; }
-        addText(`Values plotted: ${entries.map((e) => e.label).join("; ")}`);
+        addText(`Values plotted: ${entries.map((e) => e.labelAscii).join("; ")}`);
       }
 
       doc.setFont("helvetica", "bold"); doc.setFontSize(16);
@@ -1016,7 +1017,7 @@
       addText(reflectionText("input-p3-reflection-b"));
 
       addHeading("Problem 4: Inferring Step Response from Pole Placement");
-      addText(`Given pole: -24 + 32j. Entered: \u03b6 = ${document.getElementById("input-p4-zeta").value}, \u03c9n = ${document.getElementById("input-p4-wn").value}`);
+      addText(`Given pole: -24 + 32j. Entered: zeta = ${document.getElementById("input-p4-zeta").value}, wn = ${document.getElementById("input-p4-wn").value}`);
       addText("b) Discussion & sketch prediction:", { bold: true, size: 10.5 });
       addText(reflectionText("input-p4-reflection"));
       addUploadedImages("p4");
@@ -1068,7 +1069,7 @@
   // ---------------------------------------------------------------
   // Progress autosave (localStorage)
   // ---------------------------------------------------------------
-  const STORAGE_KEY = "gw4f_progress_v1";
+  const STORAGE_KEY = "gw4f_progress_v2"; // v2: trace entries now also carry labelAscii for PDF export
 
   function collectFieldValues() {
     const values = {};
