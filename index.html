@@ -718,10 +718,8 @@
       banner.className = "match-banner match";
       banner.textContent = "\u2713 Correct.";
     } else {
-      const zetaErr = Math.abs(zeta - P4_TRUE.zeta);
-      const wnErrPct = Math.abs(wn - P4_TRUE.wn) / P4_TRUE.wn * 100;
       banner.className = "match-banner no-match";
-      banner.textContent = `\u2717 Not quite (\u03b6 off by ${zetaErr.toFixed(3)}, \u03c9n off by ${wnErrPct.toFixed(1)}%) \u2014 recheck the geometry (Re(p) = -\u03b6\u03c9n, Im(p) = \u03c9n\u221a(1-\u03b6\u00b2)).`;
+      banner.textContent = "\u2717 Not quite \u2014 recheck the geometry (Re(p) = -\u03b6\u03c9n, Im(p) = \u03c9n\u221a(1-\u03b6\u00b2)).";
     }
   });
 
