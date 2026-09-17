@@ -520,6 +520,7 @@
 
   const PLOT_OPTS = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ["lasso2d", "select2d"] };
   const D_PALETTE = ["#FFB454", "#5EEAD4", "#FB7185", "#A78BFA", "#F472B6", "#34D399", "#60A5FA", "#FDE047"];
+  const LIVE_COLOR = "#FFFFFF"; // the currently-dragged marker/curve -- deliberately outside D_PALETTE so it never collides with a committed trace's color
   const GIVEN = { m: 1, F0: 1 };
 
   function plotLayoutAuto(yTitle) {
@@ -795,7 +796,7 @@
       poleTraces.push({
         x: [poles.p1.re, poles.p2.re], y: [poles.p1.im, poles.p2.im],
         mode: "markers",
-        marker: { color: "#FFB454", symbol: "x", size: 15, line: { width: 3.5, color: "#FFF3DC" } },
+        marker: { color: LIVE_COLOR, symbol: "x", size: 15, line: { width: 3.5, color: LIVE_COLOR } },
         showlegend: false,
       });
     }
@@ -823,7 +824,7 @@
     allEntries.forEach((e, i) => {
       const isLivePoint = !!live && i === allEntries.length - 1;
       const { t, x } = computed[i];
-      const color = isLivePoint ? "#FFB454" : e.color;
+      const color = isLivePoint ? LIVE_COLOR : e.color;
       xTraces.push({
         x: t, y: x, mode: "lines",
         line: { color, width: isLivePoint ? 2.6 : 1.8 },
@@ -836,7 +837,11 @@
       annotations.push({
         x: t[t.length - 1], y: yPos, xanchor: "left", yanchor: "middle",
         text: `\u03b6=${e.zeta.toFixed(2)}, \u03c9n=${e.wn.toFixed(2)}`,
-        showarrow: false, font: { size: 9, color }, bgcolor: "rgba(15,17,21,0.75)",
+        showarrow: false, font: { size: 9, color: isLivePoint ? "#0F1115" : color },
+        bgcolor: isLivePoint ? LIVE_COLOR : "rgba(15,17,21,0.75)",
+        bordercolor: isLivePoint ? LIVE_COLOR : undefined,
+        borderwidth: isLivePoint ? 1.5 : 0,
+        borderpad: isLivePoint ? 3 : 2,
       });
     });
 
