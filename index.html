@@ -197,6 +197,15 @@
   .stats-table {
     margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
   }
+  #interactive-p1, #interactive-p2, #interactive-p3 { transition: opacity 0.2s; }
+  #interactive-p1.locked, #interactive-p2.locked, #interactive-p3.locked {
+    opacity: 0.35; pointer-events: none; user-select: none;
+  }
+  .numfield-row input[type="number"]:disabled, .field input:disabled {
+    opacity: 0.5; cursor: not-allowed;
+  }
+  .run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .run-btn:disabled:hover { filter: none; }
   .stats-table table { width: 100%; border-collapse: collapse; }
   .stats-table th, .stats-table td {
     text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line);
@@ -294,32 +303,41 @@
         </p>
 
         <div class="panel-box">
-          <div class="numfield-row"><label>&zeta; (const)</label><input type="number" id="input-p1-const" value="0.3" step="any" /></div>
+          <div class="numfield-row">
+            <label>&zeta;</label>
+            <input type="number" id="input-p1-const" value="0.3" step="any" />
+            <button class="run-btn" id="btn-set-p1">SET &zeta;</button>
+            <button class="run-btn secondary" id="btn-resetconst-p1">RESET</button>
+          </div>
+          <p class="field-err" id="err-p1"></p>
         </div>
-        <p class="instructions">
-          Drag the highlighted marker along the line in the pole map to choose &omega;n. Nothing is
-          added to the plot until you click <b>ADD TO FIGURE</b> &mdash; until then, you can keep
-          repositioning the same marker.
-        </p>
-        <p class="field-err" id="err-p1"></p>
-        <p class="stats-line" id="readout-p1"></p>
-        <div style="display:flex; gap:10px; margin-bottom: 4px;">
-          <button class="run-btn" id="btn-add-p1">ADD TO FIGURE</button>
-          <button class="run-btn secondary" id="btn-undo-p1">REMOVE LAST</button>
-          <button class="run-btn secondary" id="btn-clear-p1">CLEAR PLOT</button>
-        </div>
+        <p class="instructions" id="locked-msg-p1">Set &zeta; above to begin.</p>
 
-        <div class="plots-row">
-          <div class="plot-col">
-            <p class="plot-label">pole map (s-plane) &mdash; click or drag on the highlighted line</p>
-            <div class="plot-host" id="plot-p1-pole"></div>
+        <div id="interactive-p1">
+          <p class="instructions">
+            Drag the highlighted marker along the line in the pole map to choose
+            &omega;n, or type a value directly below. Nothing is added to the plot until you
+            click <b>ADD TO FIGURE</b> &mdash; until then, you can keep repositioning the same marker.
+          </p>
+          <div class="numfield-row"><label>&omega;n</label><input type="number" id="input-p1-free-box" value="" step="any" /></div>
+          <div style="display:flex; gap:10px; margin-bottom: 4px;">
+            <button class="run-btn" id="btn-add-p1">ADD TO FIGURE</button>
+            <button class="run-btn secondary" id="btn-undo-p1">REMOVE LAST</button>
+            <button class="run-btn secondary" id="btn-clear-p1">CLEAR PLOT</button>
           </div>
-          <div class="plot-col">
-            <p class="plot-label">step response x(t)</p>
-            <div class="plot-host" id="plot-p1-x"><div class="placeholder">Click a point on the pole map to begin.</div></div>
+
+          <div class="plots-row">
+            <div class="plot-col">
+              <p class="plot-label">pole map (s-plane) &mdash; drag the marker or type &omega;n above</p>
+              <div class="plot-host" id="plot-p1-pole"></div>
+            </div>
+            <div class="plot-col">
+              <p class="plot-label">step response x(t)</p>
+              <div class="plot-host" id="plot-p1-x"><div class="placeholder">Click a point on the pole map to begin.</div></div>
+            </div>
           </div>
+          <div class="stats-table" id="stats-table-p1"></div>
         </div>
-        <div class="stats-table" id="stats-table-p1"></div>
 
         <h4 class="part-title">b) Discussion</h4>
         <p class="instructions">Discuss what you observe about the pole locations and step response (decay rate, settling time, oscillation amplitude, speed, and steady state, etc.).</p>
@@ -345,32 +363,41 @@
         </p>
 
         <div class="panel-box">
-          <div class="numfield-row"><label>&omega;n (const)</label><input type="number" id="input-p2-const" value="5" step="any" /></div>
+          <div class="numfield-row">
+            <label>&omega;n</label>
+            <input type="number" id="input-p2-const" value="5" step="any" />
+            <button class="run-btn" id="btn-set-p2">SET &omega;n</button>
+            <button class="run-btn secondary" id="btn-resetconst-p2">RESET</button>
+          </div>
+          <p class="field-err" id="err-p2"></p>
         </div>
-        <p class="instructions">
-          Drag the highlighted marker along the curve in the pole map to choose &zeta;. Nothing is
-          added to the plot until you click <b>ADD TO FIGURE</b> &mdash; until then, you can keep
-          repositioning the same marker.
-        </p>
-        <p class="field-err" id="err-p2"></p>
-        <p class="stats-line" id="readout-p2"></p>
-        <div style="display:flex; gap:10px; margin-bottom: 4px;">
-          <button class="run-btn" id="btn-add-p2">ADD TO FIGURE</button>
-          <button class="run-btn secondary" id="btn-undo-p2">REMOVE LAST</button>
-          <button class="run-btn secondary" id="btn-clear-p2">CLEAR PLOT</button>
-        </div>
+        <p class="instructions" id="locked-msg-p2">Set &omega;n above to begin.</p>
 
-        <div class="plots-row">
-          <div class="plot-col">
-            <p class="plot-label">pole map (s-plane) &mdash; click or drag on the highlighted curve</p>
-            <div class="plot-host" id="plot-p2-pole"></div>
+        <div id="interactive-p2">
+          <p class="instructions">
+            Drag the highlighted marker along the curve in the pole map to choose
+            &zeta;, or type a value directly below. Nothing is added to the plot until you
+            click <b>ADD TO FIGURE</b> &mdash; until then, you can keep repositioning the same marker.
+          </p>
+          <div class="numfield-row"><label>&zeta;</label><input type="number" id="input-p2-free-box" value="" step="any" /></div>
+          <div style="display:flex; gap:10px; margin-bottom: 4px;">
+            <button class="run-btn" id="btn-add-p2">ADD TO FIGURE</button>
+            <button class="run-btn secondary" id="btn-undo-p2">REMOVE LAST</button>
+            <button class="run-btn secondary" id="btn-clear-p2">CLEAR PLOT</button>
           </div>
-          <div class="plot-col">
-            <p class="plot-label">step response x(t)</p>
-            <div class="plot-host" id="plot-p2-x"><div class="placeholder">Click a point on the pole map to begin.</div></div>
+
+          <div class="plots-row">
+            <div class="plot-col">
+              <p class="plot-label">pole map (s-plane) &mdash; drag the marker or type &zeta; above</p>
+              <div class="plot-host" id="plot-p2-pole"></div>
+            </div>
+            <div class="plot-col">
+              <p class="plot-label">step response x(t)</p>
+              <div class="plot-host" id="plot-p2-x"><div class="placeholder">Click a point on the pole map to begin.</div></div>
+            </div>
           </div>
+          <div class="stats-table" id="stats-table-p2"></div>
         </div>
-        <div class="stats-table" id="stats-table-p2"></div>
 
         <h4 class="part-title">b) Discussion</h4>
         <p class="instructions">Discuss what you observe about the pole locations and step response (decay rate and settling time, oscillation amplitude and speed, steady state, etc.).</p>
@@ -397,32 +424,41 @@
         </p>
 
         <div class="panel-box">
-          <div class="numfield-row"><label>&omega;n (const)</label><input type="number" id="input-p3-const" value="5" step="any" /></div>
+          <div class="numfield-row">
+            <label>&omega;n</label>
+            <input type="number" id="input-p3-const" value="5" step="any" />
+            <button class="run-btn" id="btn-set-p3">SET &omega;n</button>
+            <button class="run-btn secondary" id="btn-resetconst-p3">RESET</button>
+          </div>
+          <p class="field-err" id="err-p3"></p>
         </div>
-        <p class="instructions">
-          Drag the highlighted marker along the curve in the pole map to choose &zeta;. Nothing is
-          added to the plot until you click <b>ADD TO FIGURE</b> &mdash; until then, you can keep
-          repositioning the same marker.
-        </p>
-        <p class="field-err" id="err-p3"></p>
-        <p class="stats-line" id="readout-p3"></p>
-        <div style="display:flex; gap:10px; margin-bottom: 4px;">
-          <button class="run-btn" id="btn-add-p3">ADD TO FIGURE</button>
-          <button class="run-btn secondary" id="btn-undo-p3">REMOVE LAST</button>
-          <button class="run-btn secondary" id="btn-clear-p3">CLEAR PLOT</button>
-        </div>
+        <p class="instructions" id="locked-msg-p3">Set &omega;n above to begin.</p>
 
-        <div class="plots-row">
-          <div class="plot-col">
-            <p class="plot-label">pole map (s-plane) &mdash; click or drag on the highlighted curve</p>
-            <div class="plot-host" id="plot-p3-pole"></div>
+        <div id="interactive-p3">
+          <p class="instructions">
+            Drag the highlighted marker along the curve in the pole map to choose
+            &zeta;, or type a value directly below. Nothing is added to the plot until you
+            click <b>ADD TO FIGURE</b> &mdash; until then, you can keep repositioning the same marker.
+          </p>
+          <div class="numfield-row"><label>&zeta;</label><input type="number" id="input-p3-free-box" value="" step="any" /></div>
+          <div style="display:flex; gap:10px; margin-bottom: 4px;">
+            <button class="run-btn" id="btn-add-p3">ADD TO FIGURE</button>
+            <button class="run-btn secondary" id="btn-undo-p3">REMOVE LAST</button>
+            <button class="run-btn secondary" id="btn-clear-p3">CLEAR PLOT</button>
           </div>
-          <div class="plot-col">
-            <p class="plot-label">step response x(t)</p>
-            <div class="plot-host" id="plot-p3-x"><div class="placeholder">Click a point on the pole map to begin.</div></div>
+
+          <div class="plots-row">
+            <div class="plot-col">
+              <p class="plot-label">pole map (s-plane) &mdash; drag the marker or type &zeta; above</p>
+              <div class="plot-host" id="plot-p3-pole"></div>
+            </div>
+            <div class="plot-col">
+              <p class="plot-label">step response x(t)</p>
+              <div class="plot-host" id="plot-p3-x"><div class="placeholder">Click a point on the pole map to begin.</div></div>
+            </div>
           </div>
+          <div class="stats-table" id="stats-table-p3"></div>
         </div>
-        <div class="stats-table" id="stats-table-p3"></div>
 
         <h4 class="part-title">b) Discussion</h4>
         <p class="instructions">Discuss what you observe about the pole locations and step response.</p>
@@ -861,9 +897,13 @@
     if (!dragState[prefix] || !dragState[prefix].dragging) renderStatsTable(prefix, entries);
   }
 
-  function updateLiveReadout(prefix, zeta, wn) {
-    const el = document.getElementById(`readout-${prefix}`);
-    el.textContent = `Currently dragging: \u03b6 = ${zeta.toFixed(3)}, \u03c9n = ${wn.toFixed(3)}`;
+  const wnLocked = {}; // per-prefix: whether the fixed variable (zeta for p1, wn for p2/p3) has been Set
+
+  function updateFreeBox(prefix, zeta, wn) {
+    const box = document.getElementById(`input-${prefix}-free-box`);
+    if (!box || document.activeElement === box) return; // don't clobber what the student is actively typing
+    const val = POLE_PROBLEMS[prefix].mode === "zeta" ? wn : zeta;
+    box.value = val.toFixed(3);
   }
 
   function wirePoleInteraction(prefix) {
@@ -872,6 +912,7 @@
     let pendingXY = null;
 
     function updateFromClient(clientX, clientY) {
+      if (!wnLocked[prefix]) return;
       if (!gd._fullLayout || !gd._fullLayout.xaxis || !gd._fullLayout.yaxis) return;
       const rect = gd.getBoundingClientRect();
       const xa = gd._fullLayout.xaxis, ya = gd._fullLayout.yaxis;
@@ -879,7 +920,7 @@
       const im = ya.p2d(clientY - rect.top - ya._offset);
       const proj = projectToCurve(prefix, re, im);
       dragState[prefix].livePoint = { zeta: proj.zeta, wn: proj.wn };
-      updateLiveReadout(prefix, proj.zeta, proj.wn);
+      updateFreeBox(prefix, proj.zeta, proj.wn);
       redraw(prefix);
     }
     function scheduleUpdate(clientX, clientY) {
@@ -893,6 +934,7 @@
     }
 
     gd.addEventListener("mousedown", (ev) => {
+      if (!wnLocked[prefix]) return;
       dragState[prefix].dragging = true;
       updateFromClient(ev.clientX, ev.clientY);
       ev.preventDefault();
@@ -909,6 +951,30 @@
       // exactly where it was released, and stays draggable: the student
       // can pick it back up and keep repositioning it, or click ADD TO
       // FIGURE to commit its current position.
+      redraw(prefix);
+      scheduleSave();
+    });
+  }
+
+  // Typing directly into the free-variable box moves the marker live, on
+  // every keystroke (not just on blur/enter) -- e.g. typing "123" updates
+  // the plot at "1", then "12", then "123". Out-of-range values are
+  // clamped to the curve's valid sweep range so the plot never shows a
+  // physically-meaningless or off-screen point, but the box itself still
+  // shows exactly what was typed.
+  function wireFreeBox(prefix) {
+    const cfg = POLE_PROBLEMS[prefix];
+    const box = document.getElementById(`input-${prefix}-free-box`);
+    box.addEventListener("input", () => {
+      if (!wnLocked[prefix]) return;
+      const raw = box.value.trim();
+      if (raw === "" || raw === "-" || raw === "." || raw === "-.") return; // incomplete number, wait for more typing
+      const v = Number(raw);
+      if (!isFinite(v)) return;
+      const clamped = Math.min(cfg.sweepMax, Math.max(cfg.sweepMin, v));
+      const constVal = getConstVal(prefix);
+      const point = cfg.mode === "zeta" ? { zeta: constVal, wn: clamped } : { zeta: clamped, wn: constVal };
+      dragState[prefix].livePoint = point;
       redraw(prefix);
       scheduleSave();
     });
@@ -931,19 +997,61 @@
     });
   }
 
-  function wireConstField(prefix) {
+  // Set/Reset workflow for the fixed variable (zeta for p1, wn for p2/p3).
+  // Everything else (marker, free-value box, Add/Undo/Clear, plots) stays
+  // visibly greyed out and non-interactive until Set is clicked; Reset
+  // locks it again and clears whatever was plotted, since the old points
+  // no longer correspond to a valid curve once the fixed value changes.
+  const lockControls = {}; // exposes {lock, unlock} per prefix so autosave restore can unlock directly
+  function wireSetReset(prefix) {
     const cfg = POLE_PROBLEMS[prefix];
-    const input = document.getElementById(`input-${prefix}-const`);
+    const constInput = document.getElementById(`input-${prefix}-const`);
     const errEl = document.getElementById(`err-${prefix}`);
-    input.addEventListener("input", () => {
-      const v = Number(input.value);
+    const interactiveArea = document.getElementById(`interactive-${prefix}`);
+    const lockedMsg = document.getElementById(`locked-msg-${prefix}`);
+    const setBtn = document.getElementById(`btn-set-${prefix}`);
+
+    function lock() {
+      wnLocked[prefix] = false;
+      interactiveArea.classList.add("locked");
+      lockedMsg.style.display = "block";
+      constInput.disabled = false;
+      setBtn.disabled = false;
+    }
+    function unlock() {
+      wnLocked[prefix] = true;
+      interactiveArea.classList.remove("locked");
+      lockedMsg.style.display = "none";
+      constInput.disabled = true;
+      setBtn.disabled = true;
+    }
+    lockControls[prefix] = { lock, unlock };
+
+    setBtn.addEventListener("click", () => {
+      const v = Number(constInput.value);
+      errEl.textContent = "";
       if (!isFinite(v) || v < cfg.constMin || v > cfg.constMax) {
         errEl.textContent = `Enter a value between ${cfg.constMin} and ${cfg.constMax}.`;
         return;
       }
-      errEl.textContent = "";
-      redraw(prefix); // only re-highlights the curve -- already-plotted points are untouched
+      unlock();
+      curveSamples[prefix] = sampleCurve(prefix);
+      const mid = curveSamples[prefix][Math.floor(curveSamples[prefix].length / 2)];
+      dragState[prefix].livePoint = { zeta: mid.zeta, wn: mid.wn };
+      updateFreeBox(prefix, mid.zeta, mid.wn);
+      redraw(prefix);
+      scheduleSave();
     });
+
+    document.getElementById(`btn-resetconst-${prefix}`).addEventListener("click", () => {
+      lock();
+      msdTraces[prefix] = [];
+      runFlags[prefix] = false;
+      redraw(prefix);
+      scheduleSave();
+    });
+
+    lock(); // start locked until Set is clicked, even though a default value is pre-filled
   }
 
   function wireUndoClear(prefix) {
@@ -965,16 +1073,17 @@
     msdTraces[prefix] = [];
     dragState[prefix] = { dragging: false, livePoint: null };
     // Seed a default, immediately-draggable marker at the midpoint of the
-    // current curve, so there's always something to grab rather than
-    // starting from an empty plot.
+    // current curve, so there's always something to grab once unlocked,
+    // rather than starting from an empty plot.
     const initialSamples = sampleCurve(prefix);
     const mid = initialSamples[Math.floor(initialSamples.length / 2)];
     dragState[prefix].livePoint = { zeta: mid.zeta, wn: mid.wn };
-    updateLiveReadout(prefix, mid.zeta, mid.wn);
-    wireConstField(prefix);
+    updateFreeBox(prefix, mid.zeta, mid.wn);
+    wireFreeBox(prefix);
     wirePoleInteraction(prefix);
     wireAddToFigure(prefix);
     wireUndoClear(prefix);
+    wireSetReset(prefix); // locks the interactive area by default
     redraw(prefix);
   });
 
@@ -1393,6 +1502,7 @@
         fields: collectFieldValues(),
         msdTraces: msdTraces,
         uploadedImages: uploadedImages,
+        wnLocked: wnLocked,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (err) {
@@ -1443,10 +1553,34 @@
             return Object.assign({}, e, { labelAscii: `zeta=${e.zeta}, wn=${e.wn}` });
           });
           if (msdTraces[prefix].length > 0) runFlags[prefix] = true;
-          redraw(prefix);
         }
       });
     }
+    // Restore the Set/locked state per problem -- without this, a student
+    // who had already clicked Set and made progress would come back to a
+    // re-locked, greyed-out tab on every page load, even though their
+    // fixed value and committed points are still there underneath.
+    Object.keys(POLE_PROBLEMS).forEach((prefix) => {
+      if (state.wnLocked && state.wnLocked[prefix] && lockControls[prefix]) {
+        lockControls[prefix].unlock();
+        const constVal = getConstVal(prefix);
+        const cfg = POLE_PROBLEMS[prefix];
+        // if a committed point exists, show the marker at the most recent
+        // one; otherwise fall back to the curve's midpoint
+        const lastEntry = msdTraces[prefix] && msdTraces[prefix][msdTraces[prefix].length - 1];
+        curveSamples[prefix] = sampleCurve(prefix);
+        let point;
+        if (lastEntry) {
+          point = lastEntry;
+        } else {
+          const mid = curveSamples[prefix][Math.floor(curveSamples[prefix].length / 2)];
+          point = { zeta: mid.zeta, wn: mid.wn };
+        }
+        dragState[prefix].livePoint = point;
+        updateFreeBox(prefix, point.zeta, point.wn);
+      }
+      redraw(prefix);
+    });
     if (state.uploadedImages) {
       Object.keys(state.uploadedImages).forEach((key) => {
         if (uploadedImages[key] !== undefined) {
