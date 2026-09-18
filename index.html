@@ -603,7 +603,7 @@
     document.getElementById("eq-step"), { throwOnError: false, displayMode: true }
   );
   katex.render(
-    "p_{1,2}=-4.8\\pm 6.4j",
+    "p_{1,2}=-4.5\\pm 6.0j",
     document.getElementById("eq-p4-pole"), { throwOnError: false, displayMode: true }
   );
 
@@ -1141,13 +1141,13 @@
   });
 
   // ---------------------------------------------------------------
-  // Problem 4: given pole pair -4.8 +/- 6.4j -> zeta=0.6, wn=8.
+  // Problem 4: given pole pair -4.5 +/- 6.0j -> zeta=0.6, wn=7.5.
   // Part a) checks the student's zeta/wn; part c) plots using the
   // SAME fields (kept separate so the plot doesn't appear until they
   // deliberately click Plot, preserving the "predict before you look"
   // order the assignment asks for).
   // ---------------------------------------------------------------
-  const P4_TRUE = { zeta: 0.6, wn: 8 };
+  const P4_TRUE = { zeta: 0.6, wn: 7.5 };
 
   document.getElementById("btn-check-p4").addEventListener("click", () => {
     const banner = document.getElementById("banner-p4");
@@ -1483,7 +1483,7 @@
       addText(reflectionText("input-p3-reflection-b"));
 
       addHeading("Problem 4: Inferring Step Response from Pole Placement");
-      addText(`Given pole: -4.8 + 6.4j. Entered: zeta = ${document.getElementById("input-p4-zeta").value}, wn = ${document.getElementById("input-p4-wn").value}`);
+      addText(`Given pole: -4.5 + 6.0j. Entered: zeta = ${document.getElementById("input-p4-zeta").value}, wn = ${document.getElementById("input-p4-wn").value}`);
       addText("b) Discussion & sketch prediction:", { bold: true, size: 10.5 });
       addText(reflectionText("input-p4-reflection"));
       addUploadedImages("p4");
