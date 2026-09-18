@@ -130,6 +130,11 @@
   }
   .numfield-row input[type="number"]:focus { outline: none; border-color: var(--amber); }
 
+  .free-value-row input[type="number"] { width: 110px; flex-shrink: 0; }
+  .free-value-row input[type="range"] {
+    flex: 1; accent-color: var(--amber); background: transparent; cursor: pointer;
+  }
+
   .upload-block {
     background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px;
     margin: 0 0 18px 0;
@@ -319,7 +324,7 @@
             &omega;n, or type a value directly below. Nothing is added to the plot until you
             click <b>ADD TO FIGURE</b> &mdash; until then, you can keep repositioning the same marker.
           </p>
-          <div class="numfield-row"><label>&omega;n</label><input type="number" id="input-p1-free-box" value="" step="any" /></div>
+          <div class="numfield-row free-value-row"><label>&omega;n</label><input type="number" id="input-p1-free-box" value="" step="any" /><input type="range" id="input-p1-free-slider" min="0.1" max="15" step="0.01" value="7.5" /></div>
           <div style="display:flex; gap:10px; margin-bottom: 4px;">
             <button class="run-btn" id="btn-add-p1">ADD TO FIGURE</button>
             <button class="run-btn secondary" id="btn-undo-p1">REMOVE LAST</button>
@@ -379,7 +384,7 @@
             &zeta;, or type a value directly below. Nothing is added to the plot until you
             click <b>ADD TO FIGURE</b> &mdash; until then, you can keep repositioning the same marker.
           </p>
-          <div class="numfield-row"><label>&zeta;</label><input type="number" id="input-p2-free-box" value="" step="any" /></div>
+          <div class="numfield-row free-value-row"><label>&zeta;</label><input type="number" id="input-p2-free-box" value="" step="any" /><input type="range" id="input-p2-free-slider" min="0" max="3" step="0.01" value="1.5" /></div>
           <div style="display:flex; gap:10px; margin-bottom: 4px;">
             <button class="run-btn" id="btn-add-p2">ADD TO FIGURE</button>
             <button class="run-btn secondary" id="btn-undo-p2">REMOVE LAST</button>
@@ -418,9 +423,9 @@
         <p class="instructions">
           Explore the boundaries of stability by varying &zeta; while natural
           frequency is held constant. Plot the step response and pole locations with
-          at least 4 different &zeta; &mdash; your set must include an
-          <b>unstable</b>, an <b>underdamped</b>, a <b>critically damped</b>, and an
-          <b>overdamped</b> case (try &zeta; &lt; 0 for unstable).
+          at least 5 different &zeta; &mdash; your set must include an
+          <b>unstable</b>, an <b>undamped</b>, an <b>underdamped</b>, a <b>critically damped</b>, and an
+          <b>overdamped</b> case (try &zeta; &lt; 0 for unstable, &zeta; = 0 for undamped).
         </p>
 
         <div class="panel-box">
@@ -440,7 +445,7 @@
             &zeta;, or type a value directly below. Nothing is added to the plot until you
             click <b>ADD TO FIGURE</b> &mdash; until then, you can keep repositioning the same marker.
           </p>
-          <div class="numfield-row"><label>&zeta;</label><input type="number" id="input-p3-free-box" value="" step="any" /></div>
+          <div class="numfield-row free-value-row"><label>&zeta;</label><input type="number" id="input-p3-free-box" value="" step="any" /><input type="range" id="input-p3-free-slider" min="-2" max="3" step="0.01" value="0.5" /></div>
           <div style="display:flex; gap:10px; margin-bottom: 4px;">
             <button class="run-btn" id="btn-add-p3">ADD TO FIGURE</button>
             <button class="run-btn secondary" id="btn-undo-p3">REMOVE LAST</button>
@@ -529,7 +534,7 @@
 
         <ul class="steps-list" style="margin-top: 22px;">
           <li>Enter your NetID and group member NetIDs above and export PDF.</li>
-          <li>Submit: Plots (1a, 2a, 3a, 4b/c) and a summary of discussions/explanations (other parts).</li>
+          <li>Submit: Plots (1b, 2b, 3a, 4b/c) and a summary of discussions/explanations (other parts).</li>
           <li>Optionally, attach an existing PDF below and it will be appended to the end of the exported file.</li>
           <li>Submit the combined PDF to the Gradescope submission link by Monday 11:59PM.</li>
         </ul>
@@ -900,10 +905,11 @@
   const wnLocked = {}; // per-prefix: whether the fixed variable (zeta for p1, wn for p2/p3) has been Set
 
   function updateFreeBox(prefix, zeta, wn) {
-    const box = document.getElementById(`input-${prefix}-free-box`);
-    if (!box || document.activeElement === box) return; // don't clobber what the student is actively typing
     const val = POLE_PROBLEMS[prefix].mode === "zeta" ? wn : zeta;
-    box.value = val.toFixed(3);
+    const box = document.getElementById(`input-${prefix}-free-box`);
+    if (box && document.activeElement !== box) box.value = val.toFixed(3);
+    const slider = document.getElementById(`input-${prefix}-free-slider`);
+    if (slider && document.activeElement !== slider) slider.value = val;
   }
 
   function wirePoleInteraction(prefix) {
@@ -975,6 +981,26 @@
       const constVal = getConstVal(prefix);
       const point = cfg.mode === "zeta" ? { zeta: constVal, wn: clamped } : { zeta: clamped, wn: constVal };
       dragState[prefix].livePoint = point;
+      updateFreeBox(prefix, point.zeta, point.wn); // keep the slider in sync with what was typed
+      redraw(prefix);
+      scheduleSave();
+    });
+  }
+
+  // Slider is a second, redundant way to move the same marker -- kept in
+  // sync with the box and the drag-on-pole-map interaction via the same
+  // updateFreeBox() call, so all three input methods always agree.
+  function wireFreeSlider(prefix) {
+    const cfg = POLE_PROBLEMS[prefix];
+    const slider = document.getElementById(`input-${prefix}-free-slider`);
+    slider.addEventListener("input", () => {
+      if (!wnLocked[prefix]) return;
+      const v = Number(slider.value);
+      if (!isFinite(v)) return;
+      const constVal = getConstVal(prefix);
+      const point = cfg.mode === "zeta" ? { zeta: constVal, wn: v } : { zeta: v, wn: constVal };
+      dragState[prefix].livePoint = point;
+      updateFreeBox(prefix, point.zeta, point.wn); // keep the number box in sync with the slider
       redraw(prefix);
       scheduleSave();
     });
@@ -1080,6 +1106,7 @@
     dragState[prefix].livePoint = { zeta: mid.zeta, wn: mid.wn };
     updateFreeBox(prefix, mid.zeta, mid.wn);
     wireFreeBox(prefix);
+    wireFreeSlider(prefix);
     wirePoleInteraction(prefix);
     wireAddToFigure(prefix);
     wireUndoClear(prefix);
