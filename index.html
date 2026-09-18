@@ -318,11 +318,24 @@
         </div>
         <p class="instructions" id="locked-msg-p1">Set &zeta; above to begin.</p>
 
+        <h4 class="part-title">a) Explore and Estimate</h4>
+        <p class="instructions">
+          Drag the pole/&omega;n in the s-plane back and forth across a range and watch how the
+          step response and pole locations change in real time. Estimate from the graph the
+          value &omega;n must change to so that y<sub>ss</sub> is roughly half its original value.
+        </p>
+        <p class="instructions" style="color:var(--muted);">Hint: Select a &zeta; value that lets you see a few oscillations.</p>
+        <div class="reflection-box">
+          <textarea id="input-p1-reflection-a" placeholder="Type your estimate and reasoning here..."></textarea>
+        </div>
+
         <div id="interactive-p1">
+          <h4 class="part-title" style="margin-top:0;">b) Plot Representative Values</h4>
           <p class="instructions">
-            Drag the highlighted marker along the line in the pole map to choose
-            &omega;n, or type a value directly below. Nothing is added to the plot until you
-            click <b>ADD TO FIGURE</b> &mdash; until then, you can keep repositioning the same marker.
+            Drag the highlighted marker along the line in the pole map to choose &omega;n, or
+            type a value directly below. Pick at least 4 representative &omega;n values and
+            click <b>ADD TO FIGURE</b> for each &mdash; until you do, you can keep repositioning
+            the same marker.
           </p>
           <div class="numfield-row free-value-row"><label>&omega;n</label><input type="number" id="input-p1-free-box" value="" step="any" /><input type="range" id="input-p1-free-slider" min="0.1" max="15" step="0.01" value="7.5" /></div>
           <div style="display:flex; gap:10px; margin-bottom: 4px;">
@@ -344,16 +357,16 @@
           <div class="stats-table" id="stats-table-p1"></div>
         </div>
 
-        <h4 class="part-title">b) Discussion</h4>
+        <h4 class="part-title">c) Discussion</h4>
         <p class="instructions">Discuss what you observe about the pole locations and step response (decay rate, settling time, oscillation amplitude, speed, and steady state, etc.).</p>
         <div class="reflection-box">
-          <textarea id="input-p1-reflection-b" placeholder="Type your answer here..."></textarea>
+          <textarea id="input-p1-reflection-c" placeholder="Type your answer here..."></textarea>
         </div>
 
-        <h4 class="part-title">c) Discussion</h4>
+        <h4 class="part-title">d) Discussion</h4>
         <p class="instructions">Explain physically why changing the natural frequency (while keeping the mass and damping ratio held constant) would or would not change the steady-state value.</p>
         <div class="reflection-box">
-          <textarea id="input-p1-reflection-c" placeholder="Type your answer here..."></textarea>
+          <textarea id="input-p1-reflection-d" placeholder="Type your answer here..."></textarea>
         </div>
       </section>
 
@@ -378,11 +391,31 @@
         </div>
         <p class="instructions" id="locked-msg-p2">Set &omega;n above to begin.</p>
 
+        <h4 class="part-title">a) Explore and Estimate</h4>
+        <p class="instructions">
+          Drag &zeta; back and forth in the s-plane and watch how the pole locations and step
+          response change together. Estimate from your exploration:
+        </p>
+        <ul class="goals">
+          <li>The <b>minimum</b> &zeta; value with no overshoot.</li>
+          <li>The <b>minimum</b> &zeta; value before the system goes unstable.</li>
+        </ul>
+        <p class="instructions" style="color:var(--muted);">
+          Note: overshoot is when a system's output exceeds its final, steady-state target
+          value. Graphically this means the line goes above the steady-state value (i.e. there
+          are oscillations).
+        </p>
+        <div class="reflection-box">
+          <textarea id="input-p2-reflection-a" placeholder="Type your estimates and reasoning here..."></textarea>
+        </div>
+
         <div id="interactive-p2">
+          <h4 class="part-title" style="margin-top:0;">b) Plot Representative Values</h4>
           <p class="instructions">
-            Drag the highlighted marker along the curve in the pole map to choose
-            &zeta;, or type a value directly below. Nothing is added to the plot until you
-            click <b>ADD TO FIGURE</b> &mdash; until then, you can keep repositioning the same marker.
+            Drag the highlighted marker along the curve in the pole map to choose &zeta;, or
+            type a value directly below. Pick at least 4 representative stable &zeta; values and
+            click <b>ADD TO FIGURE</b> for each &mdash; until you do, you can keep repositioning
+            the same marker.
           </p>
           <div class="numfield-row free-value-row"><label>&zeta;</label><input type="number" id="input-p2-free-box" value="" step="any" /><input type="range" id="input-p2-free-slider" min="0" max="3" step="0.01" value="1.5" /></div>
           <div style="display:flex; gap:10px; margin-bottom: 4px;">
@@ -404,16 +437,16 @@
           <div class="stats-table" id="stats-table-p2"></div>
         </div>
 
-        <h4 class="part-title">b) Discussion</h4>
+        <h4 class="part-title">c) Discussion</h4>
         <p class="instructions">Discuss what you observe about the pole locations and step response (decay rate and settling time, oscillation amplitude and speed, steady state, etc.).</p>
         <div class="reflection-box">
-          <textarea id="input-p2-reflection-b" placeholder="Type your answer here..."></textarea>
+          <textarea id="input-p2-reflection-c" placeholder="Type your answer here..."></textarea>
         </div>
 
-        <h4 class="part-title">c) Discussion</h4>
+        <h4 class="part-title">d) Discussion</h4>
         <p class="instructions">Explain physically why changing the damping ratio (while keeping the mass and natural frequency held constant) would or would not change the steady-state value.</p>
         <div class="reflection-box">
-          <textarea id="input-p2-reflection-c" placeholder="Type your answer here..."></textarea>
+          <textarea id="input-p2-reflection-d" placeholder="Type your answer here..."></textarea>
         </div>
       </section>
 
@@ -1461,20 +1494,24 @@
       y += 8;
 
       addHeading("Problem 1: Changing Natural Frequency");
+      addText("a) Estimate:", { bold: true, size: 10.5 });
+      addText(reflectionText("input-p1-reflection-a"));
       addTraceList("p1");
       if (runFlags["p1"]) await addPlotImagePair("plot-p1-x", "plot-p1-pole", "Problem 1 plots");
-      addText("b) Discussion:", { bold: true, size: 10.5 });
-      addText(reflectionText("input-p1-reflection-b"));
       addText("c) Discussion:", { bold: true, size: 10.5 });
       addText(reflectionText("input-p1-reflection-c"));
+      addText("d) Discussion:", { bold: true, size: 10.5 });
+      addText(reflectionText("input-p1-reflection-d"));
 
       addHeading("Problem 2: Changing Damping Ratio");
+      addText("a) Estimate:", { bold: true, size: 10.5 });
+      addText(reflectionText("input-p2-reflection-a"));
       addTraceList("p2");
       if (runFlags["p2"]) await addPlotImagePair("plot-p2-x", "plot-p2-pole", "Problem 2 plots");
-      addText("b) Discussion:", { bold: true, size: 10.5 });
-      addText(reflectionText("input-p2-reflection-b"));
       addText("c) Discussion:", { bold: true, size: 10.5 });
       addText(reflectionText("input-p2-reflection-c"));
+      addText("d) Discussion:", { bold: true, size: 10.5 });
+      addText(reflectionText("input-p2-reflection-d"));
 
       addHeading("Problem 3: Stability and the s-Plane");
       addTraceList("p3");
