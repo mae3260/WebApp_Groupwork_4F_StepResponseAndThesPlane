@@ -590,7 +590,6 @@
     };
   }
   const AXIS_POLE_STD = { x: [-15, 15], y: [-15, 15] };
-  const AXIS_POLE_P4 = { x: [-50, 50], y: [-50, 50] };
 
   // ---------------------------------------------------------------
   // KaTeX
@@ -604,7 +603,7 @@
     document.getElementById("eq-step"), { throwOnError: false, displayMode: true }
   );
   katex.render(
-    "p_{1,2}=-24\\pm 32j",
+    "p_{1,2}=-4.8\\pm 6.4j",
     document.getElementById("eq-p4-pole"), { throwOnError: false, displayMode: true }
   );
 
@@ -806,6 +805,32 @@
     host.innerHTML = `<table><thead><tr><th></th><th>\u03b6</th><th>\u03c9n</th><th>Settling time</th><th>Overshoot</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
 
+  // Fixed +/-15 axes keep curves visually comparable for typical
+  // exploration, but a pole can legitimately land far outside that window
+  // at the extremes of the allowed ranges (e.g. high wn combined with a
+  // strongly overdamped or unstable zeta) -- previously that pole would
+  // just be invisible, clipped off the fixed window, even though the
+  // marker/slider/box had correctly set it. This expands the axis (never
+  // smaller than the +/-15 default) to guarantee every currently-placed
+  // point -- the live marker and every committed one -- is always visible,
+  // while leaving the default window untouched for the common case where
+  // nothing is that extreme.
+  function computePoleAxisRange(prefix) {
+    const DEFAULT_HALF_RANGE = 15;
+    let maxAbs = 0;
+    const entries = msdTraces[prefix] || [];
+    const live = dragState[prefix] && dragState[prefix].livePoint;
+    const allPoints = live ? entries.concat([live]) : entries;
+    allPoints.forEach((e) => {
+      const poles = computePoles(e.zeta, e.wn);
+      maxAbs = Math.max(maxAbs, Math.abs(poles.p1.re), Math.abs(poles.p1.im), Math.abs(poles.p2.re), Math.abs(poles.p2.im));
+    });
+    // Only pad when actually expanding beyond the default -- otherwise the
+    // typical case stays at exactly +/-15, unchanged from before.
+    const half = maxAbs > DEFAULT_HALF_RANGE ? maxAbs * 1.1 : DEFAULT_HALF_RANGE;
+    return { x: [-half, half], y: [-half, half] };
+  }
+
   function redraw(prefix) {
     const entries = msdTraces[prefix] || [];
     const xHost = `plot-${prefix}-x`;
@@ -841,7 +866,8 @@
         showlegend: false,
       });
     }
-    Plotly.newPlot(poleHost, poleTraces, poleLayout(AXIS_POLE_STD.x, AXIS_POLE_STD.y, true), PLOT_OPTS);
+    const axisRange = computePoleAxisRange(prefix);
+    Plotly.newPlot(poleHost, poleTraces, poleLayout(axisRange.x, axisRange.y, true), PLOT_OPTS);
 
     // ---- step response: curves + end-of-curve labels (vertically staggered) ----
     if (entries.length === 0 && !live) {
@@ -1115,13 +1141,13 @@
   });
 
   // ---------------------------------------------------------------
-  // Problem 4: given pole pair -24 +/- 32j -> zeta=0.6, wn=40.
+  // Problem 4: given pole pair -4.8 +/- 6.4j -> zeta=0.6, wn=8.
   // Part a) checks the student's zeta/wn; part c) plots using the
   // SAME fields (kept separate so the plot doesn't appear until they
   // deliberately click Plot, preserving the "predict before you look"
   // order the assignment asks for).
   // ---------------------------------------------------------------
-  const P4_TRUE = { zeta: 0.6, wn: 40 };
+  const P4_TRUE = { zeta: 0.6, wn: 8 };
 
   document.getElementById("btn-check-p4").addEventListener("click", () => {
     const banner = document.getElementById("banner-p4");
@@ -1158,7 +1184,7 @@
     Plotly.newPlot("plot-p4-pole", [
       { x: [poles.p1.re, poles.p2.re], y: [poles.p1.im, poles.p2.im], mode: "markers",
         name: `\u03b6=${zeta}, \u03c9n=${wn}`, marker: { color: "#FFB454", symbol: "x", size: 12, line: { width: 2.5 } } },
-    ], poleLayout(AXIS_POLE_P4.x, AXIS_POLE_P4.y), PLOT_OPTS);
+    ], poleLayout(AXIS_POLE_STD.x, AXIS_POLE_STD.y), PLOT_OPTS);
     runFlags["p4"] = true;
   });
 
@@ -1457,7 +1483,7 @@
       addText(reflectionText("input-p3-reflection-b"));
 
       addHeading("Problem 4: Inferring Step Response from Pole Placement");
-      addText(`Given pole: -24 + 32j. Entered: zeta = ${document.getElementById("input-p4-zeta").value}, wn = ${document.getElementById("input-p4-wn").value}`);
+      addText(`Given pole: -4.8 + 6.4j. Entered: zeta = ${document.getElementById("input-p4-zeta").value}, wn = ${document.getElementById("input-p4-wn").value}`);
       addText("b) Discussion & sketch prediction:", { bold: true, size: 10.5 });
       addText(reflectionText("input-p4-reflection"));
       addUploadedImages("p4");
